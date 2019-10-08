@@ -1,6 +1,8 @@
 import socket
 import threading
 import os
+from os import listdir
+from os.path import isfile, join
 
 IP = '127.0.0.1'
 PORT = 12000
@@ -44,6 +46,10 @@ class Client(threading.Thread):
 
     def list(self, s):
         print("LIST COMMAND ON PORT " + str(self.port))
+        mypath = '.'
+        onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+        print("Files in directory: " + str(onlyfiles))
+        s.send(onlyfiles.encode('utf-8'))
 
     def retr(self, s):
         print("RETR COMMAND ON PORT " + str(self.port))

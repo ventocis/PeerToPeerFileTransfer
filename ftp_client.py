@@ -4,7 +4,7 @@ import socketserver
 
 class FileListener(socketserver.BaseRequestHandler):
     def handle(self):
-        print("testing")
+        print("handle file input here")
 
 print("Welcome to our FTP Client!")
 print("Commands")
