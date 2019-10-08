@@ -1,5 +1,6 @@
 import socket
 import threading
+import os
 
 IP = '127.0.0.1'
 PORT = 12000
@@ -33,9 +34,8 @@ class Client(threading.Thread):
                 elif self.command == "STOR":
                     self.stor(s)
                 elif self.command == "QUIT":
-                    s.close()
-                    self.request.close()
-                    break
+                    self.quit(s)
+                    return
                 else:
                     print("Invalid command, try again.")
             except:
@@ -53,6 +53,9 @@ class Client(threading.Thread):
 
     def quit(self, s):
         print("QUIT COMMAND ON PORT " + str(self.port))
+        print("CLOSING SOCKET... GOODBYE")
+        s.close()
+        self.request.close()
 
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serv.bind((IP, PORT))

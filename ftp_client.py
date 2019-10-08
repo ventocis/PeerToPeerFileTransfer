@@ -4,7 +4,7 @@ import socketserver
 
 class FileListener(socketserver.BaseRequestHandler):
     def handle(self):
-        print("YOOOO")
+        print("testing")
 
 print("Welcome to our FTP Client!")
 print("Commands")
@@ -41,12 +41,13 @@ while True:
 while True:
     comm = input("INPUT COMMAND: ")
     sock.send(comm.encode('utf-8'))
-    if comm == "QUIT":
-        break
     port = int.from_bytes(sock.recv(1024),byteorder='big',signed=False)
     print(port)
     serv = socketserver.TCPServer(('127.0.0.1', port), FileListener)
     sock.send("OK".encode('utf-8'))
     serv.handle_request()
+    if comm == "QUIT":
+        print("CLOSING CONNECTION...GOODBYE")
+        break
 
 sock.close()
