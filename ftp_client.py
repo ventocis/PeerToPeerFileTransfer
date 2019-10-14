@@ -4,16 +4,20 @@ import socketserver
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
-         if command[1] == "200":
-                fileName = self.request.recv(1024).decode('utf-8')
-                with open(fileName, 'w') as f:     
-                    line = self.request.recv(1024).decode('utf-8')
-                    while line != "eof":
-                        print(line)
-                        f.write(line)
-                        line = self.request.recv(1024).decode('utf-8')
+        if command[1] == "200":
+            fileName = self.request.recv(1024).decode('utf-8').strip()
+            f = open(fileName, "w")
+            print("Created file " + fileName)
+            line = self.request.recv(1024).decode('utf-8').strip()
+            #while line != "EOF":
+            while line:
+                f.write(line)
+                line = self.request.recv(1024).decode('utf-8').strip()
+            f.close()
+            print("File Downloaded")
+        elif command[1] == "550":
+            print("File not found")
     def handle(self):
-        print("handle file input here")
         command = self.request.recv(1024).decode('utf-8').split()
         if command[0] == "RETR":
             self.retr(command)

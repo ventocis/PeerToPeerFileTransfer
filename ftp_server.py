@@ -52,18 +52,22 @@ class Client(threading.Thread):
         s.send(onlyfiles.encode('utf-8'))
 
     def retr(self, s, command):
-        print("RETR COMMAND ON PORT " + str(self.port))
         fileName = command[1]
         if path.exists(fileName):   #check if file exits
             s.send("RETR 200".encode('utf-8'))   #Return code 200 OK if file is found
             s.send(fileName.encode('utf-8'))    #send the file name to be downloaded
             #create TCP connection on the given client port
-            with open(fileName, 'r') as fs: #Send file line by line over TCP 
-                for line in fs:
+            with open(fileName, 'r') as fs: #Send file line by line over TCP
+                line = fs.read(1024)
+                while line:
                     s.send(line.encode('utf-8'))
-                    s.send("\n".encode('utf-8'))
-                s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF    
+                    line = fs.read(1024)
+                s.close()
+                print("File sent")
+                #s.send("\n".encode('utf-8'))
+                #s.send("EOF".encode('utf-8'))     #When the file has completed being sent send EOF    
         else:
+            print("File not found")
             s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found
         #Terminate TCP connection
 
