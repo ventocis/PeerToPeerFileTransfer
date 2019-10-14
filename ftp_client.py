@@ -6,17 +6,29 @@ class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
          if command[1] == "200":
                 fileName = self.request.recv(1024).decode('utf-8')
-                with open(fileName, 'w') as f:     
+                with open(fileName, 'w') as f:
                     line = self.request.recv(1024).decode('utf-8')
                     while line != "eof":
                         print(line)
                         f.write(line)
                         line = self.request.recv(1024).decode('utf-8')
+
+    def list(self, command):
+        if len(command) <= 1:
+            print("No files to list")
+        else:
+            print("Files stored:")
+            for x in command:
+                if x != "LIST":
+                    print(x)
+
     def handle(self):
         print("handle file input here")
         command = self.request.recv(1024).decode('utf-8').split()
         if command[0] == "RETR":
             self.retr(command)
+        elif command[0] == "LIST":
+            self.list(command)
             
 
 print("Welcome to our FTP Client!")
@@ -42,7 +54,7 @@ while True:
         port = int(tokens[2])
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((ip,port))
+            sock.connect((ip, port))
         except:
             print("ERROR: Invalid IP or port")
             continue
@@ -54,7 +66,7 @@ while True:
 while True:
     comm = input("INPUT COMMAND: ")
     sock.send(comm.encode('utf-8'))
-    port = int.from_bytes(sock.recv(1024),byteorder='big',signed=False)
+    port = int.from_bytes(sock.recv(1024), byteorder='big', signed=False)
     print(port)
     serv = socketserver.TCPServer(('127.0.0.1', port), FileListener)
     sock.send("OK".encode('utf-8'))
@@ -63,6 +75,5 @@ while True:
     if comm[0] == "QUIT":
         print("CLOSING CONNECTION...GOODBYE")
         break
-
 sock.close()
 

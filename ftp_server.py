@@ -39,7 +39,7 @@ class Client(threading.Thread):
                     self.quit(s)
                     return
                 else:
-                    print("Invalid command, try again.")
+                    s.send("Invalid command, try again.".encode('utf-8'))
             except:
                 print()
                 continue
@@ -49,7 +49,8 @@ class Client(threading.Thread):
         mypath = '.'
         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
         print("Files in directory: " + str(onlyfiles))
-        s.send(onlyfiles.encode('utf-8'))
+        files = "LIST " + " ".join(onlyfiles)
+        s.send(files.encode('utf-8'))
 
     def retr(self, s, command):
         print("RETR COMMAND ON PORT " + str(self.port))
@@ -62,7 +63,7 @@ class Client(threading.Thread):
                 for line in fs:
                     s.send(line.encode('utf-8'))
                     s.send("\n".encode('utf-8'))
-                s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF    
+                s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF
         else:
             s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found
         #Terminate TCP connection
