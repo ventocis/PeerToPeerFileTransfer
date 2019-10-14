@@ -55,13 +55,42 @@ class Client(threading.Thread):
     def retr(self, s, command):
         fileName = command[1]
         if path.exists(fileName):   #check if file exits
-            s.send("RETR 200".encode('utf-8'))   #Return code 200 OK if file is found
-            s.send(fileName.encode('utf-8'))    #send the file name to be downloaded
+            s.send(("RETR 200 " + str(fileName)).encode('utf-8'))   #Return code 200 OK if file is found
+            ourResponse = s.recv(1024).decode('utf-8')
+            # f = open(fileName, "r")
+            # print("Opened file " + fileName)
+            # line = f.readline()
+            # while line:
+            #     s.send(line.encode('utf-8'))
+            #     line = f.readline()
+            # f.close()
+            # #create TCP connection on the given client port
+            # if ourResponse == "200":
+            #     myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/'
+            #     with open(myPath + fileName, 'r') as fs:  #Send file line by line over TCP
+            #         for line in fs:
+            #             s.send(line.encode('utf-8'))
+                        
+
+        myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/'
+        # check if file exits
+        if os.path.exists(myPath + fileName):
+            # self.request.send("STOR 200".encode('utf-8'))  #Return code 200 OK if file is found
+            # print("Filename:" + fileName)
+            # send the file name to be downloaded
+            # s.send(fileName.encode('utf-8'))
             #create TCP connection on the given client port
-            with open(fileName, 'r') as fs:  #Send file line by line over TCP
+            with open(myPath + fileName, 'r') as fs:
                 for line in fs:
-                    s.write(line)
-                s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF    
+                    # line = line + "\n"
+                    s.send(line.encode('utf-8'))
+                    ourResponse = s.recv(1024).decode('utf-8')
+                s.close()
+                print("File sent")
+
+
+
+
         else:
             print("File not found")
             s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found

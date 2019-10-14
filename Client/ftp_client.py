@@ -7,14 +7,32 @@ import os
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
-         if command[1] == "200":
-                fileName = self.request.recv(1024).decode('utf-8')
-                with open(fileName, 'w') as f:     
-                    line = self.request.recv(1024).decode('utf-8')
-                    while line != "eof":
-                        print(line)
-                        f.write(line)
-                        line = self.request.recv(1024).decode('utf-8')
+        if command[1] == "200":
+            # fileName = command[2]
+            # f = open(fileName, "w")
+            # self.request.send("200".encode('utf-8'))
+            # print("Created file " + fileName)
+            # line = self.request.recv(1024).decode('utf-8')
+            # while line:
+            #     f.write(line)
+            #     line = self.request.recv(1024).decode('utf-8')
+            # f.close()
+            # print("File downloaded")
+
+            myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/Client/'
+            fileName = command[2]
+            fileName = fileName.strip()
+            f = open(myPath + fileName, "w")
+            self.request.send(("200").encode('utf-8'))
+            print("Created file " + fileName)
+            line = self.request.recv(1024).decode('utf-8')
+            #while line != "EOF":
+            while line:
+                f.write(line)
+                self.request.send(("200").encode('utf-8'))
+                line = self.request.recv(1024).decode('utf-8')
+            f.close()
+            print("File Downloaded")
 
     def stor(self, command):
         print("stor called on client & command is:" + str(command))
@@ -52,6 +70,7 @@ class FileListener(socketserver.BaseRequestHandler):
         command = self.request.recv(1024).decode('utf-8').split()
         print(command)
         if command[0] == "RETR":
+            print(str(command))
             self.retr(command)
         elif command[0] == "STOR":
             print("got to handle")
