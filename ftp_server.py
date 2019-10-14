@@ -53,7 +53,6 @@ class Client(threading.Thread):
         s.send(onlyfiles.encode('utf-8'))
 
     def retr(self, s, command):
-        print("RETR COMMAND ON PORT " + str(self.port))
         fileName = command[1]
         if path.exists(fileName):   #check if file exits
             s.send("RETR 200".encode('utf-8'))   #Return code 200 OK if file is found
@@ -64,6 +63,7 @@ class Client(threading.Thread):
                     s.write(line)
                 s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF    
         else:
+            print("File not found")
             s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found
         #Terminate TCP connection
 

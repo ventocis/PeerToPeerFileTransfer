@@ -49,7 +49,6 @@ class FileListener(socketserver.BaseRequestHandler):
         #Terminate TCP connection
 
     def handle(self):
-        print("handle file input here")
         command = self.request.recv(1024).decode('utf-8').split()
         print(command)
         if command[0] == "RETR":
