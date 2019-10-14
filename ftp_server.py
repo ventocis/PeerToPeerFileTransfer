@@ -1,7 +1,7 @@
 import socket
 import threading
 import os
-from os import listdir
+from os import listdir, path
 from os.path import isfile, join
 
 IP = '127.0.0.1'
@@ -17,7 +17,7 @@ class Client(threading.Thread):
     def run(self):
         while(True):
             global COUNT
-            self.command = self.request.recv(1024).decode('utf-8')
+            self.command = self.request.recv(1024).decode('utf-8').split()
             print(self.command)
             COUNT = COUNT + 1
             self.port = PORT + 2 * COUNT
@@ -29,13 +29,13 @@ class Client(threading.Thread):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 s.connect(('127.0.0.1', self.port))
-                if self.command == "LIST":
+                if self.command[0] == "LIST":
                     self.list(s)
-                elif self.command == "RETR":
-                    self.retr(s)
-                elif self.command == "STOR":
+                elif self.command[0] == "RETR":
+                    self.retr(s, self.command)
+                elif self.command[0] == "STOR":
                     self.stor(s)
-                elif self.command == "QUIT":
+                elif self.command[0] == "QUIT":
                     self.quit(s)
                     return
                 else:
@@ -51,8 +51,21 @@ class Client(threading.Thread):
         print("Files in directory: " + str(onlyfiles))
         s.send(onlyfiles.encode('utf-8'))
 
-    def retr(self, s):
+    def retr(self, s, command):
         print("RETR COMMAND ON PORT " + str(self.port))
+        fileName = command[1]
+        if path.exists(fileName):   #check if file exits
+            s.send("RETR 200".encode('utf-8'))   #Return code 200 OK if file is found
+            s.send(fileName.encode('utf-8'))    #send the file name to be downloaded
+            #create TCP connection on the given client port
+            with open(fileName, 'r') as fs: #Send file line by line over TCP 
+                for line in fs:
+                    s.send(line.encode('utf-8'))
+                    s.send("\n".encode('utf-8'))
+                s.send("eof".encode('utf-8'))     #When the file has completed being sent send EOF    
+        else:
+            s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found
+        #Terminate TCP connection
 
     def stor(self, s):
         print("STOR COMMAND ON PORT " + str(self.port))

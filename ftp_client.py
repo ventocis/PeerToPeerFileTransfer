@@ -3,8 +3,21 @@ import sys
 import socketserver
 
 class FileListener(socketserver.BaseRequestHandler):
+    def retr(self, command):
+         if command[1] == "200":
+                fileName = self.request.recv(1024).decode('utf-8')
+                with open(fileName, 'w') as f:     
+                    line = self.request.recv(1024).decode('utf-8')
+                    while line != "eof":
+                        print(line)
+                        f.write(line)
+                        line = self.request.recv(1024).decode('utf-8')
     def handle(self):
         print("handle file input here")
+        command = self.request.recv(1024).decode('utf-8').split()
+        if command[0] == "RETR":
+            self.retr(command)
+            
 
 print("Welcome to our FTP Client!")
 print("Commands")
@@ -46,8 +59,10 @@ while True:
     serv = socketserver.TCPServer(('127.0.0.1', port), FileListener)
     sock.send("OK".encode('utf-8'))
     serv.handle_request()
-    if comm == "QUIT":
+    comm = comm.split()
+    if comm[0] == "QUIT":
         print("CLOSING CONNECTION...GOODBYE")
         break
 
 sock.close()
+
