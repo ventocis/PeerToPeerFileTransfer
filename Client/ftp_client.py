@@ -1,6 +1,9 @@
 import socket
 import sys
 import socketserver
+from os import listdir, path
+from os.path import isfile, join
+import os
 
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
@@ -12,11 +15,51 @@ class FileListener(socketserver.BaseRequestHandler):
                         print(line)
                         f.write(line)
                         line = self.request.recv(1024).decode('utf-8')
+
+    def stor(self, command):
+        print("stor called on client & command is:" + str(command))
+        fileName = command[1]
+        print("filename:" + fileName)
+        fileName = fileName.strip()
+        myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/Client/'
+        # check if file exits
+        if os.path.exists(myPath + fileName):
+            # self.request.send("STOR 200".encode('utf-8'))  #Return code 200 OK if file is found
+            print("Filename:" + fileName)
+            self.request.send(fileName.encode('utf-8'))    #send the file name to be downloaded
+            #create TCP connection on the given client port
+            with open(myPath + fileName, 'r') as fs:
+                for line in fs:
+                    # line = line + "\n"
+                    self.request.send(line.encode('utf-8'))
+                self.request.close()
+                print("File sent")
+
+            # with open(myPath + fileName, 'r') as fs: #Send file line by line over TCP 
+            #     line = fs.read(1024)
+            #     while line:
+            #         self.request.send(line.encode('utf-8'))
+            #         line = fs.read(1024)
+            #     self.request.close()
+            #     print("File sent")
+
+
+        else:
+            self.send("STOR 550".encode('utf-8'))   #Return code 550 if not found
+        #Terminate TCP connection
+
     def handle(self):
         print("handle file input here")
         command = self.request.recv(1024).decode('utf-8').split()
+        print(command)
         if command[0] == "RETR":
             self.retr(command)
+        elif command[0] == "STOR":
+            print("got to handle")
+            self.stor(command)
+        else:
+            print("Skipped it")
+        return 
             
 
 print("Welcome to our FTP Client!")
@@ -24,7 +67,7 @@ print("Commands")
 print("CONNECT [ADDRESS] [PORT]: connects you to a server")
 print("LIST: lists files on server")
 print("RETR [FILENAME]: retrieves file on server")
-print("STORE [FILENAME]: stores file on server")
+print("STOR [FILENAME]: stores file on server")
 print("QUIT: closes connection with server and exits the program")
 print()
 
@@ -65,4 +108,6 @@ while True:
         break
 
 sock.close()
+
+
 
