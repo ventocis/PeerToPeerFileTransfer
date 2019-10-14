@@ -2,6 +2,9 @@ import socket
 import sys
 import socketserver
 
+PORT = 12000
+COUNT = 1
+
 class FileListener(socketserver.BaseRequestHandler):
     def retr(self, command):
         if command[1] == "200":
@@ -21,7 +24,24 @@ class FileListener(socketserver.BaseRequestHandler):
         command = self.request.recv(1024).decode('utf-8').split()
         if command[0] == "RETR":
             self.retr(command)
-            
+
+def setupSocket(command):
+    global PORT
+    global COUNT
+    PORT = PORT + 2 * COUNT
+    command = str(PORT) + " " + command
+    serv = socketserver.TCPServer(('127.0.0.1', PORT), FileListener)
+    sock.send(command.encode('utf-8'))
+    serv.handle_request()
+
+def retr(command):
+    setupSocket(command)
+
+def stor(command):
+    print("in stor")
+
+def listCMD(command):
+    print("in list")
 
 print("Welcome to our FTP Client!")
 print("Commands")
@@ -57,14 +77,14 @@ while True:
 
 while True:
     comm = input("INPUT COMMAND: ")
-    sock.send(comm.encode('utf-8'))
-    port = int.from_bytes(sock.recv(1024),byteorder='big',signed=False)
-    print(port)
-    serv = socketserver.TCPServer(('127.0.0.1', port), FileListener)
-    sock.send("OK".encode('utf-8'))
-    serv.handle_request()
-    comm = comm.split()
-    if comm[0] == "QUIT":
+    tokens = comm.split()
+    if tokens[0] == "RETR":
+        retr(comm)
+    elif tokens[0] == "STOR":
+        stor(comm)
+    elif tokens[0] == "LIST":
+        listCMD(comm)
+    elif tokens[0] == "QUIT":
         print("CLOSING CONNECTION...GOODBYE")
         break
 
