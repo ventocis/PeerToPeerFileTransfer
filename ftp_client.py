@@ -1,6 +1,7 @@
 import socket
 import sys
 import socketserver
+import re
 
 class FileListener(socketserver.BaseRequestHandler):
     def handle(self):
@@ -18,6 +19,9 @@ print()
 ip = None
 port = None
 sock = None
+count = 0
+dPort = 140000
+
 while True:
     comm = input("INPUT COMMAND: ")
     tokens = comm.split()
@@ -40,6 +44,9 @@ while True:
 
 while True:
     comm = input("INPUT COMMAND: ")
+    # count = count + 1
+    # dPort = dPort + count * 2
+    # comm = comm + " " + str(dPort)
     sock.send(comm.encode('utf-8'))
     port = int.from_bytes(sock.recv(1024),byteorder='big',signed=False)
     print(port)
@@ -49,5 +56,24 @@ while True:
     if comm == "QUIT":
         print("CLOSING CONNECTION...GOODBYE")
         break
+    if re.search('STORE .*', comm) is not None:
+        storSoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        storSoc.bind(('127.0.0.1', port))
+        storSoc.listen()
+        storSoc.accept()
+		# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		# s.connect((TCP_IP, TCP_PORT))
+		# s.send(MESSAGE)
+		# data = s.recv(BUFFER_SIZE)
+		# s.close()
+        print("good")
+
+        # sock.send("check")
+
 
 sock.close()
+
+#1) open data port as server
+#2)wait for response from server
+#3) Send file
+#4)close connection

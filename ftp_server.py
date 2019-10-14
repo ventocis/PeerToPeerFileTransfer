@@ -3,10 +3,12 @@ import threading
 import os
 from os import listdir
 from os.path import isfile, join
+import re
 
 IP = '127.0.0.1'
 PORT = 12000
 COUNT = 0
+
 
 class Client(threading.Thread):
     def __init__(self, s, addr):
@@ -18,7 +20,7 @@ class Client(threading.Thread):
         while(True):
             global COUNT
             self.command = self.request.recv(1024).decode('utf-8')
-            print(self.command)
+            print("received command: " + self.command)
             COUNT = COUNT + 1
             self.port = PORT + 2 * COUNT
             print(self.port)
@@ -33,7 +35,7 @@ class Client(threading.Thread):
                     self.list(s)
                 elif self.command == "RETR":
                     self.retr(s)
-                elif self.command == "STOR":
+                elif re.search('STORE .*', self.command) is not None:
                     self.stor(s)
                 elif self.command == "QUIT":
                     self.quit(s)
@@ -55,7 +57,11 @@ class Client(threading.Thread):
         print("RETR COMMAND ON PORT " + str(self.port))
 
     def stor(self, s):
+        print("Port:" + self.port)
+        s.connect(('127.0.0.1', self.port))
+        print(self)
         print("STOR COMMAND ON PORT " + str(self.port))
+		
 
     def quit(self, s):
         print("QUIT COMMAND ON PORT " + str(self.port))
@@ -68,6 +74,11 @@ serv.bind((IP, PORT))
 serv.listen(1)
 
 while True:
+    # serv.accept returns a (host, port) pair
+    # conn is a new socket object that can be used to send & receive
+    # data on the connection
+    # Address is the address bound to the socket on the enter of the
+    # connection
     conn, addr = serv.accept()
     print("USER: " + str(addr) + " CONNECTED")
     client_thr = Client(conn, addr)
