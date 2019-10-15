@@ -28,25 +28,13 @@ class FileListener(socketserver.BaseRequestHandler):
             print("File not found")
 
     def stor(self, command):
-        print("stor called on client & command is:" + str(command))
-        fileName = command[1]
-        print("filename:" + fileName)
-        fileName = fileName.strip()
+        fileName = command[1].strip()
         #myPath = '/Users/samventocilla/Code/cis457DataComm/Proj1/CIS457Proj1/Client/'
-        # check if file exits
-        if os.path.exists(fileName):
-            # self.request.send("STOR 200".encode('utf-8'))  #Return code 200 OK if file is found
-            print("Filename:" + fileName)
-            self.request.send(fileName.encode('utf-8'))    #send the file name to be downloaded
-            #create TCP connection on the given client port
-            with open(fileName, 'r') as fs:
-                for line in fs:
-                    self.request.send(line.encode('utf-8'))
-                self.request.close()
-                print("File sent")
-        else:
-            self.request.send("STOR 550".encode('utf-8'))   #Return code 550 if not found
-        #Terminate TCP connection
+        with open(fileName, 'r') as fs:
+            for line in fs:
+                self.request.send(line.encode('utf-8'))
+            self.request.close()
+            print("File Uploaded")
 
 
     def list(self, command):
@@ -56,7 +44,7 @@ class FileListener(socketserver.BaseRequestHandler):
             print("Files stored:")
             for x in command:
                 if x != "LIST":
-                    print(x)
+                    print("\t" + x)
 
     def handle(self):     
         command = self.request.recv(1024).decode('utf-8').split()
@@ -83,7 +71,13 @@ def retr(command):
     setupSocket(command)
 
 def stor(command):
-    setupSocket(command)
+    tokens = command.split()
+    fileName = tokens[1].strip()
+    if os.path.exists(fileName):
+        print("File " + fileName + " found")
+        setupSocket(command)
+    else:
+        print("File Not Found")
 
 def listCMD(command):
     setupSocket(command)
@@ -112,6 +106,7 @@ while True:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((ip,port))
+            print("Connected to " + ip)
         except:
             print("ERROR: Invalid IP or port")
             continue
@@ -121,7 +116,7 @@ while True:
         continue
 
 while True:
-    comm = input("INPUT COMMAND: ")
+    comm = input("\nINPUT COMMAND: ")
     tokens = comm.split()
     if tokens[0] == "RETR":
         retr(comm)
@@ -130,8 +125,9 @@ while True:
     elif tokens[0] == "LIST":
         listCMD(comm)
     elif tokens[0] == "QUIT":
-        print("CLOSING CONNECTION...GOODBYE")
-        break
+        sock.send(comm.encode('utf-8'))
+        print("CLOSING CONNECTION TO SERVER...GOODBYE")
+        sys.exit()
 
 sock.close()
 

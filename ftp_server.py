@@ -16,6 +16,9 @@ class Client(threading.Thread):
     def run(self):
         while(True):
             self.command = self.request.recv(1024).decode('utf-8').split()
+            if self.command[0] == "QUIT":
+                    self.quit()
+                    return
             self.port = int(self.command[0])
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             
@@ -27,9 +30,6 @@ class Client(threading.Thread):
                     self.retr(s, self.command)
                 elif self.command[1] == "STOR":
                     self.stor(s, self.command)
-                elif self.command[1] == "QUIT":
-                    self.quit(s)
-                    return
                 else:
                     print("Invalid command, try again.")          
             except socket.error as exc:
@@ -51,7 +51,6 @@ class Client(threading.Thread):
         if os.path.exists(fileName):
             with open(fileName, 'r') as fs:
                 for line in fs:
-                    # line = line + "\n"
                     s.send(line.encode('utf-8'))
                     ourResponse = s.recv(1024).decode('utf-8')
                 s.close()
@@ -59,29 +58,24 @@ class Client(threading.Thread):
         else:
             print("File not found")
             s.send("RETR 550".encode('utf-8'))   #Return code 550 if not found
-        #Terminate TCP connection
+            s.close()
 
     def stor(self, s, command):
-        print("stor called on server & command is:" + str(command))
+        fileName = command[2].strip()
         myString = "STOR "
-        myString = myString + command[2]
+        myString = myString + fileName
         s.send(myString.encode('utf-8'))
-        fileName = s.recv(1024).decode('utf-8')
-        fileName = fileName.strip()
         f = open(fileName, "w")
         print("Created file " + fileName)
         line = s.recv(1024).decode('utf-8')
-        #while line != "EOF":
         while line:
             f.write(line)
             line = s.recv(1024).decode('utf-8')
         f.close()
         print("File Downloaded")
 
-    def quit(self, s):
-        print("QUIT COMMAND ON PORT " + str(self.port))
-        print("CLOSING SOCKET... GOODBYE")
-        s.close()
+    def quit(self):
+        print(IP + " Has Disconnected")
         self.request.close()
 
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
