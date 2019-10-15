@@ -118,16 +118,18 @@ while True:
 while True:
     comm = input("\nINPUT COMMAND: ")
     tokens = comm.split()
-    if tokens[0] == "RETR":
+    if tokens[0] == "RETR" and len(tokens) == 2:
         retr(comm)
-    elif tokens[0] == "STOR":
+    elif tokens[0] == "STOR" and len(tokens) == 2:
         stor(comm)
-    elif tokens[0] == "LIST":
+    elif tokens[0] == "LIST" and len(tokens) == 1:
         listCMD(comm)
-    elif tokens[0] == "QUIT":
+    elif tokens[0] == "QUIT" and len(tokens) == 1:
         sock.send(comm.encode('utf-8'))
         print("CLOSING CONNECTION TO SERVER...GOODBYE")
         sys.exit()
+    else:
+        print("Invalid Command")
 
 sock.close()
 
