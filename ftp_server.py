@@ -75,7 +75,7 @@ class Client(threading.Thread):
         print("File Downloaded")
 
     def quit(self):
-        print(IP + " Has Disconnected")
+        print("Client Has Disconnected")
         self.request.close()
 
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

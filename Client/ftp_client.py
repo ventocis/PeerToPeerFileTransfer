@@ -87,7 +87,7 @@ print("Commands")
 print("CONNECT [ADDRESS] [PORT]: connects you to a server")
 print("LIST: lists files on server")
 print("RETR [FILENAME]: retrieves file on server")
-print("STORE [FILENAME]: stores file on server")
+print("STOR [FILENAME]: stores file on server")
 print("QUIT: closes connection with server and exits the program")
 print()
 
