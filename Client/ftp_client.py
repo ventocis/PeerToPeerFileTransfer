@@ -101,6 +101,9 @@ while True:
         if len(tokens) != 3:
             print("INCORRECT NUMBER OF ARGUMENTS")
             continue
+        if len(tokens) == 3 and tokens[2] != 12000:
+            print("Incorrect port")
+            continue
         ip = tokens[1]
         port = int(tokens[2])
         try:
